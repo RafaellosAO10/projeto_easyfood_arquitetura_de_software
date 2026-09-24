@@ -1,7 +1,7 @@
 # ADR-004 - Autenticação com JWT
 
 ## Status
-Proposta
+Aceita (proposta em 03/09/2026 e implementada na Atividade 5)
 
 ## Data
 03/09/2026
@@ -56,6 +56,13 @@ middleware que protege as rotas de escrita.
 - Um token emitido não pode ser revogado antes de expirar sem mecanismos extras (lista de bloqueio,
   *refresh tokens*).
 - Recursos como recuperação de senha, confirmação de e-mail e MFA teriam de ser implementados por nós.
+
+## Implementação
+- `src/modules/auth/`: `auth.service.js`, `auth.controller.js`, `auth.middleware.js` e `auth.routes.js`.
+- Model `User` (e-mail único, senha em hash bcrypt com custo 10) — migration `criar-tabela-users`.
+- Rotas: `POST /auth/register`, `POST /auth/login` e `GET /auth/me` (protegida).
+- `POST /restaurants` protegido pelo middleware; `GET /restaurants` continua público.
+- Token com `sub` (id do usuário) e `email`, assinado com `JWT_SECRET` e expiração de 1 dia.
 
 ## Critérios de revisão
 Reavaliar quando:
