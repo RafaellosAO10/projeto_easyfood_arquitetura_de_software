@@ -30,6 +30,26 @@ app.get("/restaurants", (req, res) => {
   res.json(restaurants);
 });
 
+// POST — Cadastrar restaurante
+app.post("/restaurants", (req, res) => {
+  const { name, category, rating } = req.body;
+
+  if (!name || !category) {
+    return res.status(400).json({ error: "Nome e categoria são obrigatórios" });
+  }
+
+  const novoRestaurante = {
+    id: restaurants.length + 1,
+    name,
+    category,
+    rating: rating || 0
+  };
+
+  restaurants.push(novoRestaurante);
+
+  res.status(201).json(novoRestaurante);
+});
+
 app.listen(3000, () => {
   console.log("EasyFood rodando na porta 3000");
 });
