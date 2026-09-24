@@ -1,37 +1,24 @@
 const express = require("express");
+const { PrismaClient } = require("@prisma/client");
 
 const app = express();
+const prisma = new PrismaClient();
 
 app.use(express.json());
 
-const restaurants = [
-  {
-    id: 1,
-    name: "Pizzaria Napoli",
-    category: "Pizza",
-    rating: 4.8
-  },
-  {
-    id: 2,
-    name: "Burger House",
-    category: "Hambúrguer",
-    rating: 4.7
-  },
-  {
-    id: 3,
-    name: "Sushi House",
-    category: "Japonês",
-    rating: 4.9
-  }
-];
-
 // GET — Listar restaurantes
-app.get("/restaurants", (req, res) => {
-  res.json(restaurants);
+app.get("/restaurants", async (req, res) => {
+  try {
+    const restaurantes = await prisma.restaurant.findMany();
+    res.json(restaurantes);
+  } catch (error) {
+    console.error("Erro ao buscar restaurantes:", error.message);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 });
 
 // POST — Cadastrar restaurante
-app.post("/restaurants", (req, res) => {
+app.post("/restaurants", async (req, res) => {
   // Sem corpo JSON, o Express 5 deixa req.body como undefined
   const { name, category, rating } = req.body || {};
 
@@ -43,16 +30,16 @@ app.post("/restaurants", (req, res) => {
     return res.status(400).json({ error: "A avaliação deve ser um número entre 0 e 5" });
   }
 
-  const novoRestaurante = {
-    id: restaurants.length + 1,
-    name,
-    category,
-    rating: rating || 0
-  };
+  try {
+    const novoRestaurante = await prisma.restaurant.create({
+      data: { name, category, rating: rating || 0 }
+    });
 
-  restaurants.push(novoRestaurante);
-
-  res.status(201).json(novoRestaurante);
+    res.status(201).json(novoRestaurante);
+  } catch (error) {
+    console.error("Erro ao cadastrar restaurante:", error.message);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 });
 
 app.listen(3000, () => {
