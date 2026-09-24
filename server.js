@@ -1,10 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const { PrismaClient } = require("@prisma/client");
+const prisma = require("./src/database/prisma");
 
 const app = express();
-const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
