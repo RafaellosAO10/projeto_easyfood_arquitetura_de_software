@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const prisma = require("./src/database/prisma");
+const restaurantService = require("./src/modules/restaurants/restaurant.service");
 
 const app = express();
 
@@ -9,20 +9,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// O Prisma devolve colunas DECIMAL como objetos Decimal, que viram string no JSON.
-// Convertemos para número para manter o mesmo formato de resposta da versão em memória.
-function formatRestaurant(restaurant) {
-  return {
-    ...restaurant,
-    rating: restaurant.rating === null ? null : Number(restaurant.rating)
-  };
-}
-
 // GET — Listar restaurantes
 app.get("/restaurants", async (req, res) => {
   try {
-    const restaurantes = await prisma.restaurant.findMany();
-    res.json(restaurantes.map(formatRestaurant));
+    const restaurantes = await restaurantService.listRestaurants();
+    res.json(restaurantes);
   } catch (error) {
     console.error("Erro ao buscar restaurantes:", error.message);
     res.status(500).json({ error: "Erro interno do servidor" });
@@ -52,11 +43,8 @@ app.post("/restaurants", async (req, res) => {
   }
 
   try {
-    const novoRestaurante = await prisma.restaurant.create({
-      data: { name, category, rating: rating || 0 }
-    });
-
-    res.status(201).json(formatRestaurant(novoRestaurante));
+    const novoRestaurante = await restaurantService.createRestaurant({ name, category, rating });
+    res.status(201).json(novoRestaurante);
   } catch (error) {
     console.error("Erro ao cadastrar restaurante:", error.message);
     res.status(500).json({ error: "Erro interno do servidor" });
