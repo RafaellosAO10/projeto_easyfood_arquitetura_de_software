@@ -1,7 +1,7 @@
 # ADR-001 - Armazenar restaurantes em memória
 
 ## Status
-Aceita
+Substituída pela [ADR-002 - Persistência com PostgreSQL](ADR-002-persistencia-com-postgresql.md)
 
 ## Data
 20/08/2026
