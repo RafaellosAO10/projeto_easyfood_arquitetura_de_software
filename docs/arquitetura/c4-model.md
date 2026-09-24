@@ -41,38 +41,52 @@ flowchart LR
 
 ## Nível 3 — Component
 
-Como a API está organizada internamente?
+Como a API está organizada internamente? Monólito modular em camadas
+([ADR-003](../adr/ADR-003-monolito-modular-em-camadas.md)).
 
 ```mermaid
 flowchart TB
-    subgraph api["EasyFood API — server.js"]
-        express["Express<br/>cors · express.json() · express.static"]
-        get["Rota GET /restaurants<br/>Consulta"]
-        post["Rota POST /restaurants<br/>Valida e cadastra"]
-        client["PrismaClient"]
+    server["server.js<br/>Liga o servidor"]
+    app["src/app.js<br/>cors · express.json() · express.static · rotas"]
+
+    subgraph restaurants["Módulo restaurants"]
+        routes["restaurant.routes.js<br/>GET / · POST /"]
+        controller["restaurant.controller.js<br/>req/res · validação · status HTTP"]
+        service["restaurant.service.js<br/>Operações e regras"]
     end
+
+    database["src/database/prisma.js<br/>PrismaClient"]
     db[("PostgreSQL")]
 
-    express --> get
-    express --> post
-    get --> client
-    post --> client
-    client --> db
+    server --> app
+    app -- "/restaurants" --> routes
+    routes --> controller
+    controller --> service
+    service --> database
+    database --> db
 ```
 
 ## Nível 4 — Code
 
 ```js
-app.post("/restaurants", async (req, res) => {
+// restaurant.routes.js
+router.get("/", controller.list);
+router.post("/", controller.create);
+
+// restaurant.controller.js
+async function create(req, res) {
   const { name, category, rating } = req.body || {};
-  // validações -> 400
-  try {
-    const novoRestaurante = await prisma.restaurant.create({
-      data: { name, category, rating: rating || 0 }
-    });
-    res.status(201).json(formatRestaurant(novoRestaurante));
-  } catch (error) {
-    res.status(500).json({ error: "Erro interno do servidor" });
-  }
-});
+  const validationError = validateRestaurant({ name, category, rating });
+  if (validationError) return res.status(400).json({ error: validationError });
+  const restaurant = await restaurantService.createRestaurant({ name, category, rating });
+  res.status(201).json(restaurant);
+}
+
+// restaurant.service.js
+async function createRestaurant(data) {
+  const restaurant = await prisma.restaurant.create({
+    data: { name: data.name, category: data.category, rating: data.rating || 0 }
+  });
+  return formatRestaurant(restaurant);
+}
 ```
