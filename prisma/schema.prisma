@@ -9,3 +9,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Restaurant {
+  id       Int      @id @default(autoincrement())
+  name     String   @db.VarChar(150)
+  category String?  @db.VarChar(100)
+  rating   Decimal? @db.Decimal(2, 1)
+}
