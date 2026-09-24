@@ -13,8 +13,37 @@
   </header>
 
   <main>
+    <section class="card" id="auth-section">
+      <div id="auth-logged-out">
+        <h2 id="auth-title">Entrar</h2>
+        <form id="auth-form">
+          <label id="auth-name-field" hidden>
+            Nome *
+            <input name="name" maxlength="150" placeholder="Seu nome">
+          </label>
+          <label>
+            E-mail *
+            <input name="email" type="email" maxlength="150" placeholder="voce@email.com" required>
+          </label>
+          <label>
+            Senha *
+            <input name="password" type="password" minlength="6" maxlength="72" required>
+          </label>
+          <button type="submit" id="auth-submit">Entrar</button>
+          <button type="button" id="auth-toggle" class="link-button">Não tem conta? Cadastre-se</button>
+          <p id="auth-message" class="message" role="status"></p>
+        </form>
+      </div>
+
+      <div id="auth-logged-in" class="auth-logged-in" hidden>
+        <span>Conectado como <strong id="auth-user"></strong></span>
+        <button type="button" id="logout-button" class="link-button">Sair</button>
+      </div>
+    </section>
+
     <section class="card">
       <h2>Cadastrar restaurante</h2>
+      <p id="restaurant-login-hint" class="hint">Entre com sua conta para cadastrar um restaurante.</p>
       <form id="restaurant-form">
         <label>
           Nome do restaurante *

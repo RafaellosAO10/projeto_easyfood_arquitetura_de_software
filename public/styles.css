@@ -90,6 +90,34 @@ button:hover {
   color: #1a7f37;
 }
 
+.link-button {
+  background: none;
+  color: #1a7f37;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.link-button:hover {
+  background: none;
+  color: #146c2e;
+}
+
+.auth-logged-in {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.hint {
+  margin-top: 0;
+  color: #616e7c;
+}
+
+[hidden] {
+  display: none !important;
+}
+
 .restaurant-list {
   list-style: none;
   margin: 0;
