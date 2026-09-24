@@ -25,13 +25,19 @@ flowchart LR
     usuario["👤 Cliente / Restaurante"]
 
     subgraph easyfood["EasyFood"]
-        api["EasyFood API<br/>[Node.js + Express]<br/>GET /restaurants<br/>POST /restaurants"]
-        memoria[("Array em memória<br/>[processo Node.js]")]
+        web["Página web<br/>[HTML + JavaScript]<br/>public/"]
+        api["EasyFood API<br/>[Node.js + Express + Prisma]<br/>GET /restaurants<br/>POST /restaurants"]
+        db[("Banco de dados<br/>[PostgreSQL]<br/>tabela Restaurant")]
     end
 
-    usuario -- "HTTP / JSON" --> api
-    api -- "push / leitura" --> memoria
+    usuario -- "Navegador" --> web
+    usuario -- "HTTP / JSON (Postman)" --> api
+    web -- "fetch HTTP / JSON" --> api
+    api -- "Prisma Client (SQL/TCP)" --> db
 ```
+
+> Mudança em relação à versão anterior: o container "array em memória" foi substituído pelo
+> PostgreSQL ([ADR-002](../adr/ADR-002-persistencia-com-postgresql.md)).
 
 ## Nível 3 — Component
 
@@ -40,26 +46,33 @@ Como a API está organizada internamente?
 ```mermaid
 flowchart TB
     subgraph api["EasyFood API — server.js"]
-        express["Express<br/>express.json()"]
+        express["Express<br/>cors · express.json() · express.static"]
         get["Rota GET /restaurants<br/>Consulta"]
         post["Rota POST /restaurants<br/>Valida e cadastra"]
-        array[("restaurants[]")]
+        client["PrismaClient"]
     end
+    db[("PostgreSQL")]
 
     express --> get
     express --> post
-    get --> array
-    post --> array
+    get --> client
+    post --> client
+    client --> db
 ```
 
 ## Nível 4 — Code
 
 ```js
-app.post("/restaurants", (req, res) => {
+app.post("/restaurants", async (req, res) => {
   const { name, category, rating } = req.body || {};
   // validações -> 400
-  const novoRestaurante = { id: restaurants.length + 1, name, category, rating: rating || 0 };
-  restaurants.push(novoRestaurante);
-  res.status(201).json(novoRestaurante);
+  try {
+    const novoRestaurante = await prisma.restaurant.create({
+      data: { name, category, rating: rating || 0 }
+    });
+    res.status(201).json(formatRestaurant(novoRestaurante));
+  } catch (error) {
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 });
 ```

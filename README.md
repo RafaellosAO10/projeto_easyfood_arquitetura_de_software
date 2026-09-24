@@ -2,23 +2,53 @@
 
 API da **EasyFood**, projeto desenvolvido ao longo da disciplina *Software Architecture & Design Patterns*.
 
+```
+Cliente -> API (Express) -> Prisma -> PostgreSQL
+```
+
 ## Tecnologias
 
-- Node.js (LTS)
-- Express
+- Node.js (LTS) e Express
+- PostgreSQL
+- Prisma ORM
 
 ## Como executar
 
-```bash
-npm install
-node server.js
-```
+1. Instale as dependências:
 
-Saída esperada:
+   ```bash
+   npm install
+   ```
 
-```
-EasyFood rodando na porta 3000
-```
+2. Crie o banco no PostgreSQL:
+
+   ```sql
+   CREATE DATABASE easyfood;
+   ```
+
+3. Copie o `.env.example` para `.env` e ajuste a senha do usuário `postgres`:
+
+   ```env
+   DATABASE_URL="postgresql://postgres:SUA_SENHA_AQUI@localhost:5432/easyfood"
+   ```
+
+4. Crie as tabelas e insira os dados iniciais:
+
+   ```bash
+   npx prisma migrate dev
+   npm run seed
+   ```
+
+5. Inicie o servidor:
+
+   ```bash
+   node server.js
+   ```
+
+   Saída esperada: `EasyFood rodando na porta 3000`.
+   A página web fica disponível em http://localhost:3000.
+
+Para visualizar os dados: `npx prisma studio` (http://localhost:5555).
 
 ## Rotas
 
@@ -36,14 +66,16 @@ Content-Type: application/json
 { "name": "Taco Loco", "category": "Mexicana", "rating": 4.3 }
 ```
 
-`name` e `category` são obrigatórios; `rating` é opcional (número entre 0 e 5). Resposta: `201 Created`.
-
-> Os restaurantes ficam em memória: os cadastros são perdidos ao reiniciar o servidor
-> (ver [ADR-001](docs/adr/ADR-001-armazenar-restaurantes-em-memoria.md)).
+`name` (até 150 caracteres) e `category` (até 100) são obrigatórios; `rating` é opcional
+(número entre 0 e 5). Resposta: `201 Created`.
 
 ## Documentação
 
 - [Arquitetura — C4 Model](docs/arquitetura/c4-model.md)
-- ADRs: [ADR-001 — Armazenar restaurantes em memória](docs/adr/ADR-001-armazenar-restaurantes-em-memoria.md)
-- [Missão 1 — Cadastro de restaurantes](docs/missoes/missao-1.md)
-- [Missão 2 — Teste da arquitetura e registro de decisões](docs/missoes/missao-2.md)
+- ADRs
+  - [ADR-001 — Armazenar restaurantes em memória](docs/adr/ADR-001-armazenar-restaurantes-em-memoria.md) *(substituída)*
+  - [ADR-002 — Persistência com PostgreSQL](docs/adr/ADR-002-persistencia-com-postgresql.md)
+- Missões
+  - [Missão 1 — Cadastro de restaurantes](docs/missoes/missao-1.md)
+  - [Missão 2 — Teste da arquitetura e registro de decisões](docs/missoes/missao-2.md)
+  - [Missão 3 — Persistência com PostgreSQL e Prisma](docs/missoes/missao-3.md)
