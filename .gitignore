@@ -1,1 +1,3 @@
 node_modules
+# Mantém as variáveis de ambiente (senha do banco) fora do versionamento
+.env
