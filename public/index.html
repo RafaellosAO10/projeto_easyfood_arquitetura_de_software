@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EasyFood</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>EasyFood</h1>
+    <p>Restaurantes disponíveis na plataforma</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Cadastrar restaurante</h2>
+      <form id="restaurant-form">
+        <label>
+          Nome do restaurante *
+          <input name="name" maxlength="150" placeholder="Ex.: Burger House" required>
+        </label>
+        <label>
+          Categoria *
+          <input name="category" maxlength="100" placeholder="Ex.: Hambúrguer" required>
+        </label>
+        <label>
+          Avaliação (0 a 5)
+          <input name="rating" type="number" min="0" max="5" step="0.1" placeholder="Ex.: 4.5">
+        </label>
+        <button type="submit">Cadastrar restaurante</button>
+        <p id="form-message" class="message" role="status"></p>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Restaurantes</h2>
+      <ul id="restaurant-list" class="restaurant-list"></ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
