@@ -1,0 +1,24 @@
+{
+  "name": "easy-food",
+  "version": "1.0.0",
+  "description": "API da EasyFood - projeto da disciplina Software Architecture & Design Patterns",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RafaellosAO10/projeto_easyfood_arquitetura_de_software.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RafaellosAO10/projeto_easyfood_arquitetura_de_software/issues"
+  },
+  "homepage": "https://github.com/RafaellosAO10/projeto_easyfood_arquitetura_de_software#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
