@@ -83,3 +83,4 @@ Esta decisão deverá ser reavaliada quando:
   que a persistência foi de fato implementada.
 - A API continua oferecendo `GET /restaurants` e `POST /restaurants`; mudou apenas a implementação
   interna: `API -> PRISMA -> POSTGRESQL`.
+- O PostgreSQL passou a ser hospedado no Supabase: ver [ADR-006](ADR-006-postgresql-gerenciado-no-supabase.md).

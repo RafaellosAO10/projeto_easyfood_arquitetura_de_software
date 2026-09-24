@@ -11,7 +11,7 @@ Cliente -> Routes -> [Middleware JWT] -> Controller -> Service -> Database (Pris
 ## Tecnologias
 
 - Node.js (LTS) e Express 5
-- PostgreSQL + Prisma ORM
+- PostgreSQL (Supabase) + Prisma ORM
 - JWT (`jsonwebtoken`), `bcryptjs` e `dotenv`
 - Testes com o runner nativo do Node (`node:test`)
 
@@ -23,25 +23,42 @@ Cliente -> Routes -> [Middleware JWT] -> Controller -> Service -> Database (Pris
    npm install
    ```
 
-2. Crie o banco no PostgreSQL:
-
-   ```sql
-   CREATE DATABASE easyfood;
-   ```
-
-3. Copie o `.env.example` para `.env` e configure:
+2. Configure o banco. O banco da EasyFood fica no **Supabase**
+   ([ADR-006](docs/adr/ADR-006-postgresql-gerenciado-no-supabase.md)).
+   Copie o `.env.example` para `.env` e preencha com os dados do projeto
+   (Supabase > Project Settings > Database > Connection string):
 
    ```env
-   DATABASE_URL="postgresql://postgres:SUA_SENHA_AQUI@localhost:5432/easyfood"
+   # API: pooler em modo transação (porta 6543)
+   DATABASE_URL="postgresql://postgres.SEU_PROJECT_REF:SUA_SENHA@aws-0-SUA_REGIAO.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+   # Migrations: pooler em modo sessão (porta 5432)
+   DIRECT_URL="postgresql://postgres.SEU_PROJECT_REF:SUA_SENHA@aws-0-SUA_REGIAO.pooler.supabase.com:5432/postgres"
+   # Chave própria da API para assinar os tokens (não é a senha do banco)
    JWT_SECRET="troque-por-uma-chave-longa-e-aleatoria"
+   ```
+
+   Para gerar o `JWT_SECRET`:
+   `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`.
+
+   Para usar um PostgreSQL local, crie o banco (`CREATE DATABASE easyfood;`) e use
+   `postgresql://postgres:SUA_SENHA@localhost:5432/easyfood` em `DATABASE_URL` e `DIRECT_URL`.
+
+3. (Opcional) Vincule o Supabase CLI ao projeto:
+
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref SEU_PROJECT_REF
    ```
 
 4. Crie as tabelas e insira os restaurantes iniciais:
 
    ```bash
-   npx prisma migrate dev
+   npx prisma migrate deploy
    npm run seed
    ```
+
+   As migrations também habilitam o Row Level Security, que impede o acesso às tabelas pela
+   Data API pública do Supabase; a API da EasyFood continua com acesso normal.
 
 5. Inicie o servidor:
 
@@ -145,6 +162,7 @@ easy-food/
 | 3 | Persistência com PostgreSQL + Prisma, seed, migration e ADR-002 |
 | 4 | Refatoração em camadas (routes, controller, service, database), testes, ADR-003 e ADR-004 (proposta) |
 | 5 | Autenticação JWT: cadastro, login, `/auth/me` e `POST /restaurants` protegido |
+| Pós-atividades | Banco hospedado no Supabase, com RLS bloqueando a Data API pública (ADR-006) |
 
 ## Documentação
 
@@ -155,6 +173,7 @@ easy-food/
   - [ADR-003 — Monólito modular em camadas](docs/adr/ADR-003-monolito-modular-em-camadas.md)
   - [ADR-004 — Autenticação com JWT](docs/adr/ADR-004-autenticacao-com-jwt.md)
   - [ADR-005 — Não adotar eventos neste momento](docs/adr/ADR-005-nao-adotar-eventos.md)
+  - [ADR-006 — PostgreSQL gerenciado no Supabase](docs/adr/ADR-006-postgresql-gerenciado-no-supabase.md)
 - Missões
   - [Missão 1 — Cadastro de restaurantes](docs/missoes/missao-1.md)
   - [Missão 2 — Teste da arquitetura e registro de decisões](docs/missoes/missao-2.md)
