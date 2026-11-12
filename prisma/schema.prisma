@@ -17,7 +17,7 @@ model Restaurant {
   category String?  @db.VarChar(100)
   rating   Decimal? @db.Decimal(2, 1)
   // Dono do restaurante (quem o cadastrou). Opcional porque os restaurantes
-  // anteriores a esta versão não têm dono; esses não podem ser gerenciados (ADR-007).
+  // anteriores a esta versão não têm dono; esses não podem ser gerenciados (ver ADR-007).
   ownerId  Int?
   owner    User?    @relation(fields: [ownerId], references: [id])
   dishes   Dish[]

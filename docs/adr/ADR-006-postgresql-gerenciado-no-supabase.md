@@ -1,7 +1,7 @@
 # ADR-006 - PostgreSQL gerenciado no Supabase
 
 ## Status
-Aceita
+Substituída pela [ADR-008](ADR-008-postgresql-local-em-docker.md) em 12/11/2026 (projeto do Supabase excluído)
 
 ## Data
 24/09/2026
