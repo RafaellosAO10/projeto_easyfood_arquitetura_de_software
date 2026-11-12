@@ -1,4 +1,5 @@
 const authService = require("./auth.service");
+const { sendError } = require("../shared/http-error");
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -80,7 +81,28 @@ async function login(req, res) {
   }
 }
 
+async function me(req, res) {
+  try {
+    const user = await authService.getProfile(req.user.id);
+    res.json({ message: "Você está autenticado!", user });
+  } catch (error) {
+    sendError(res, error, "buscar perfil");
+  }
+}
+
+// O arquivo já chega validado (tipo e tamanho) pelo upload.middleware
+async function uploadImage(req, res) {
+  try {
+    const user = await authService.updateProfileImage(req.user.id, req.file.buffer);
+    res.json(user);
+  } catch (error) {
+    sendError(res, error, "enviar foto de perfil");
+  }
+}
+
 module.exports = {
   register,
-  login
+  login,
+  me,
+  uploadImage
 };

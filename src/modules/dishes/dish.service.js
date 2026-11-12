@@ -1,5 +1,6 @@
 const prisma = require("../../database/prisma");
 const { HttpError } = require("../shared/http-error");
+const imageService = require("../shared/image.service");
 
 // O Prisma devolve DECIMAL como objeto Decimal (string no JSON); expomos número.
 function formatDish(dish) {
@@ -84,30 +85,34 @@ async function updateDish(dishId, data, userId) {
   return formatDish(updated);
 }
 
-// Devolve o prato removido para quem chamou poder apagar a imagem do disco.
 async function deleteDish(dishId, userId) {
   const dish = await findDishWithRestaurant(dishId);
   ensureOwnership(dish.restaurant, userId);
 
   await prisma.dish.delete({ where: { id: dishId } });
-
-  return formatDish(dish);
+  await imageService.deleteImage(dish.imageUrl);
 }
 
-// Usado pelo upload: confere o dono antes de aceitar a imagem.
-async function getManagedDish(dishId, userId) {
+// Upload da foto do prato: confere existência (404) e dono (403) antes de processar.
+async function updateDishImage(dishId, buffer, userId) {
   const dish = await findDishWithRestaurant(dishId);
   ensureOwnership(dish.restaurant, userId);
-  return formatDish(dish);
-}
 
-async function setDishImage(dishId, imageUrl) {
-  const dish = await prisma.dish.update({
-    where: { id: dishId },
-    data: { imageUrl }
-  });
+  const imageUrl = await imageService.saveImage(buffer, "dishes", dish.id);
+  let updated;
 
-  return formatDish(dish);
+  try {
+    updated = await prisma.dish.update({ where: { id: dish.id }, data: { imageUrl } });
+  } catch (error) {
+    // Banco falhou: não deixa arquivo órfão no disco
+    await imageService.deleteImage(imageUrl);
+    throw error;
+  }
+
+  // Só remove a foto antiga depois que a nova foi salva com sucesso
+  await imageService.deleteImage(dish.imageUrl);
+
+  return formatDish(updated);
 }
 
 module.exports = {
@@ -116,6 +121,5 @@ module.exports = {
   createDish,
   updateDish,
   deleteDish,
-  getManagedDish,
-  setDishImage
+  updateDishImage
 };

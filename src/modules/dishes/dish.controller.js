@@ -97,4 +97,14 @@ async function remove(req, res) {
   }
 }
 
-module.exports = { list, getById, create, update, remove };
+// O arquivo já chega validado (tipo e tamanho) pelo upload.middleware
+async function uploadImage(req, res) {
+  try {
+    const dish = await dishService.updateDishImage(parseId(req.params.dishId), req.file.buffer, req.user.id);
+    res.json(dish);
+  } catch (error) {
+    sendError(res, error, "enviar imagem do prato");
+  }
+}
+
+module.exports = { list, getById, create, update, remove, uploadImage };
