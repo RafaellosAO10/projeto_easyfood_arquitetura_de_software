@@ -1,7 +1,8 @@
 const orderService = require("./order.service");
 const { sendError, parseId } = require("../shared/http-error");
 
-// O usuário sempre vem do token (req.user.id); o service decide o que ele pode ver e mudar
+// O controller só traduz HTTP: pego o usuário sempre do token (req.user.id), nunca da URL,
+// e deixo para o service decidir o que ele pode ver e mudar
 async function create(req, res) {
   try {
     const order = await orderService.createOrder(req.user.id, req.body);

@@ -26,7 +26,7 @@ app.use("/restaurants", restaurantRoutes);
 app.use("/favorites", favoriteRoutes);
 // As rotas de pratos usam caminhos completos (/restaurants/:id/dishes e /dishes/:id)
 app.use(dishRoutes);
-// Pedidos: /orders e /restaurants/:id/orders (caminhos completos, como pratos)
+// Pedidos: /orders e /restaurants/:id/orders (o router já tem os caminhos completos, como pratos)
 app.use(orderRoutes);
 
 module.exports = app;

@@ -66,7 +66,7 @@ model Favorite {
   @@index([restaurantId])
 }
 
-// Etapas de um pedido (ver ADR-013). As transições permitidas ficam em order.service.js.
+// Etapas de um pedido (ADR-013). Quais mudanças são permitidas eu deixei em order.service.js.
 enum OrderStatus {
   PLACED // recebido, aguardando o restaurante
   PREPARING // em preparo
@@ -75,8 +75,8 @@ enum OrderStatus {
   CANCELLED // cancelado (final)
 }
 
-// Pedido de um cliente para um restaurante (um restaurante por pedido, como o carrinho).
-// O total é calculado no servidor a partir dos preços do banco, nunca enviado pelo cliente.
+// Pedido de um cliente para um restaurante (um restaurante por pedido, igual ao carrinho).
+// O total eu calculo no servidor com os preços do banco; nunca confio no que o cliente manda.
 model Order {
   id           Int         @id @default(autoincrement())
   userId       Int
@@ -93,8 +93,8 @@ model Order {
   @@index([restaurantId, createdAt])
 }
 
-// Item do pedido. Nome e preço são uma "foto" do prato no momento da compra:
-// mudar ou apagar o prato depois não altera pedidos antigos (dishId vira nulo).
+// Item do pedido. Guardo nome e preço como uma "foto" do prato na hora da compra: se o
+// dono mudar ou apagar o prato depois, o pedido antigo continua igual (dishId só vira nulo).
 model OrderItem {
   id        Int     @id @default(autoincrement())
   orderId   Int

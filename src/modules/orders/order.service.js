@@ -6,9 +6,9 @@ const MAX_ITEMS = 50;
 const MAX_QUANTITY = 99;
 const STATUSES = Object.values(OrderStatus);
 
-// Máquina de estados do pedido (ADR-013): quem pode levar o pedido de um status a outro.
-// O restaurante avança o preparo; o cliente só cancela enquanto o restaurante não começou.
-// DELIVERED e CANCELLED são finais.
+// Máquina de estados do pedido (ADR-013). Deixo numa tabela só quem pode levar o pedido de
+// um status a outro: o dono avança o preparo e o cliente só cancela enquanto o restaurante
+// não começou. DELIVERED e CANCELLED não aparecem como origem porque são finais.
 const TRANSITIONS = {
   owner: {
     PLACED: ["PREPARING", "CANCELLED"],
@@ -25,7 +25,8 @@ const ORDER_INCLUDE = {
   items: { orderBy: { id: "asc" } }
 };
 
-// O Prisma devolve DECIMAL como objeto Decimal (string no JSON); expomos número.
+// O Prisma me devolve DECIMAL como objeto Decimal (vira string no JSON), então converto
+// para número aqui, só na saída. As contas continuam em Decimal.
 function formatOrder(order) {
   return {
     id: order.id,
@@ -46,8 +47,9 @@ function formatOrder(order) {
   };
 }
 
-// Valida o corpo de POST /orders e devolve { restaurantId, items: [{ dishId, quantity }] }.
-// O cliente manda só ids e quantidades: nome e preço vêm do banco.
+// Valido o corpo de POST /orders e devolvo { restaurantId, items: [{ dishId, quantity }] }.
+// Do cliente eu só aceito ids e quantidades; nome e preço eu busco no banco, porque o
+// carrinho fica no navegador e qualquer um poderia mudar o preço lá.
 function parseOrderInput(body) {
   if (!body || typeof body !== "object") {
     throw new HttpError(400, "Corpo da requisição inválido");
@@ -93,7 +95,8 @@ async function createOrder(userId, body) {
     throw new HttpError(404, "Restaurante não encontrado");
   }
 
-  // Só pratos deste restaurante: um pedido não mistura restaurantes
+  // Filtro pelo restaurante também: assim um prato de outro restaurante "não existe" aqui
+  // e o pedido não mistura restaurantes
   const dishes = await prisma.dish.findMany({
     where: { id: { in: items.map((item) => item.dishId) }, restaurantId }
   });
@@ -104,7 +107,8 @@ async function createOrder(userId, body) {
     throw new HttpError(400, `Prato ${missing.dishId} não existe neste restaurante`);
   }
 
-  // Preço e nome copiados do prato agora (a "foto" do pedido); total somado com Decimal, sem erro de ponto flutuante
+  // Copio nome e preço do prato agora (a "foto" do pedido), para o histórico não mudar se o
+  // dono mexer no cardápio depois. Somo com Decimal porque em float 12.9 * 3 dá 38.6999...
   const orderItems = items.map(({ dishId, quantity }) => {
     const dish = dishById.get(dishId);
     return { dishId, quantity, name: dish.name, unitPrice: dish.price };
@@ -115,7 +119,7 @@ async function createOrder(userId, body) {
   );
 
   try {
-    // Criação aninhada: pedido e itens entram na mesma transação
+    // Criação aninhada: o Prisma grava pedido e itens na mesma transação (ou tudo, ou nada)
     const order = await prisma.order.create({
       data: { userId, restaurantId, total, items: { create: orderItems } },
       include: ORDER_INCLUDE
@@ -123,8 +127,8 @@ async function createOrder(userId, body) {
 
     return formatOrder(order);
   } catch (error) {
-    // P2003 = chave estrangeira inexistente: restaurante/prato apagado durante a gravação,
-    // ou o usuário do token (ainda válido) não existe mais
+    // P2003 = chave estrangeira inexistente. Acontece se apagaram o prato/restaurante entre a
+    // minha consulta e a gravação, ou se o usuário do token (ainda válido) já não existe.
     if (error.code === "P2003") {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       throw user
@@ -135,7 +139,7 @@ async function createOrder(userId, body) {
   }
 }
 
-// Pedidos do próprio usuário, do mais recente para o mais antigo
+// Pedidos do próprio usuário, do mais recente para o mais antigo (id desempata o mesmo instante)
 async function listMyOrders(userId) {
   const orders = await prisma.order.findMany({
     where: { userId },
@@ -146,7 +150,8 @@ async function listMyOrders(userId) {
   return orders.map(formatOrder);
 }
 
-// Papéis do usuário neste pedido: cliente (quem pediu) e/ou dono do restaurante
+// Descubro o papel do usuário neste pedido: cliente (quem pediu) e/ou dono do restaurante.
+// Pode ser os dois, se o dono pedir no próprio restaurante.
 function rolesFor(order, userId) {
   const roles = [];
   if (order.userId === userId) roles.push("customer");
@@ -154,8 +159,8 @@ function rolesFor(order, userId) {
   return roles;
 }
 
-// Carrega o pedido e confere se o usuário pode vê-lo. Quem não é cliente nem dono
-// recebe 404, e não 403: pedidos são dados pessoais e nem a existência deve vazar.
+// Carrego o pedido e confiro se o usuário pode vê-lo. Para quem não é cliente nem dono eu
+// respondo 404, e não 403: pedido é dado pessoal, e um 403 confirmaria que aquele id existe.
 async function findVisibleOrder(orderId, userId) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
@@ -175,6 +180,7 @@ async function findVisibleOrder(orderId, userId) {
   return { order, roles };
 }
 
+// Uso o ownerId só para checar permissão; tiro da resposta para não expor o dono
 function stripOwner(order) {
   const { ownerId, ...restaurant } = order.restaurant;
   return { ...order, restaurant };
@@ -185,7 +191,8 @@ async function getOrder(orderId, userId) {
   return formatOrder(stripOwner(order));
 }
 
-// Pedidos recebidos por um restaurante: só o dono vê
+// Pedidos recebidos por um restaurante: só o dono vê. Aqui uso 403 (como nos pratos)
+// porque o restaurante é público; não há o que esconder sobre ele existir.
 async function listRestaurantOrders(restaurantId, userId) {
   const restaurant = await prisma.restaurant.findUnique({ where: { id: restaurantId } });
 
@@ -216,7 +223,7 @@ async function updateStatus(orderId, userId, body) {
   const { order, roles } = await findVisibleOrder(orderId, userId);
   const current = order.status;
 
-  // Idempotente: pedir o status que o pedido já tem não é erro (ex.: clique duplo em "Cancelar")
+  // Deixo idempotente: pedir o status que o pedido já tem não é erro (ex.: clique duplo em "Cancelar")
   if (current === next) {
     return formatOrder(stripOwner(order));
   }
@@ -224,14 +231,17 @@ async function updateStatus(orderId, userId, body) {
   const allowedForUser = roles.some((role) => TRANSITIONS[role][current]?.includes(next));
 
   if (!allowedForUser) {
+    // Separo os dois erros: 403 se a mudança existe mas não é deste papel (cliente tentando
+    // aceitar), 409 se ninguém pode fazê-la (pular etapa, sair de um status final)
     const allowedForSomeone = Object.values(TRANSITIONS).some((byStatus) => byStatus[current]?.includes(next));
     throw allowedForSomeone
       ? new HttpError(403, "Você não tem permissão para fazer esta mudança no pedido")
       : new HttpError(409, `Não é possível mudar o pedido de ${current} para ${next}`);
   }
 
-  // Concorrência otimista: só grava se o status ainda for o lido acima. Se o restaurante
-  // avançou o pedido no mesmo instante em que o cliente cancelou, um dos dois recebe 409.
+  // Concorrência otimista: só gravo se o status ainda for o que eu li acima. Se o restaurante
+  // aceitar no mesmo instante em que o cliente cancela, só um UPDATE acha a linha; o outro
+  // recebe 409. Não preciso de lock nem de transação longa para isso.
   const { count } = await prisma.order.updateMany({
     where: { id: orderId, status: current },
     data: { status: next }

@@ -33,7 +33,7 @@ async function createDish(restId, name, price, owner) {
   return (await response.json()).id;
 }
 
-// Pedido válido de 2 pizzas + 1 suco (2 x 12,90 + 7,50 = 33,30)
+// Pedido válido que uso em vários testes: 2 pizzas + 1 suco (2 x 12,90 + 7,50 = 33,30)
 async function placeValidOrder(user = cliente) {
   const response = await createOrder({
     restaurantId,
@@ -60,7 +60,7 @@ before(async () => {
 
 after(async () => {
   try {
-    // Pedidos e itens são removidos em cascata junto com usuários e restaurantes
+    // Apagando usuários e restaurantes, os pedidos e itens vão junto (cascata)
     await prisma.restaurant.deleteMany({ where: { id: { in: restaurantIds } } });
     await prisma.user.deleteMany({ where: { email: { in: userEmails } } });
   } finally {
@@ -131,7 +131,7 @@ describe("POST /orders", () => {
     assert.equal(afterUpdate.items[0].unitPrice, 10);
     assert.equal(afterUpdate.total, 10);
 
-    // Apagar o prato mantém o item no pedido, só sem o vínculo
+    // Apago o prato: o item tem que continuar no pedido, só sem o vínculo
     await requestJson("DELETE", `${baseUrl}/dishes/${dishId}`, undefined, dona.token);
     const afterDelete = await (await getOrder(order.id)).json();
     assert.equal(afterDelete.items[0].dishId, null);
@@ -330,8 +330,8 @@ describe("PATCH /orders/:id/status (máquina de estados)", () => {
     const responses = await Promise.all([setStatus(id, "CANCELLED", cliente), setStatus(id, "PREPARING", dona)]);
     const statuses = responses.map((r) => r.status);
 
-    // Um vence (200). O outro recebe 409 se leu o pedido antes da gravação (concorrência otimista)
-    // ou, se leu depois, 403/409 pela máquina de estados; nunca dois 200.
+    // Um tem que vencer (200). O outro leva 409 se leu o pedido antes da gravação (concorrência
+    // otimista) ou 403/409 pela máquina de estados se leu depois. O que nunca pode: dois 200.
     assert.equal(statuses.filter((s) => s === 200).length, 1, String(statuses));
     assert.ok(statuses.every((s) => [200, 403, 409].includes(s)), String(statuses));
     const final = await (await getOrder(id)).json();
