@@ -132,3 +132,143 @@ describe("POST /restaurants", () => {
     assert.equal(response.status, 400);
   });
 });
+
+describe("GET /restaurants?search=", () => {
+  // Marca única por execução: os testes não dependem dos restaurantes que já estão no banco
+  const tag = `busca${Date.now().toString(36)}`;
+  const ids = {};
+
+  function search(term) {
+    return fetch(`${baseUrl}/restaurants?search=${encodeURIComponent(term)}`);
+  }
+
+  // Ids dos restaurantes criados por este bloco que vieram na resposta
+  async function foundKeys(response) {
+    const body = await response.json();
+    return Object.keys(ids).filter((key) => body.some((restaurant) => restaurant.id === ids[key]));
+  }
+
+  before(async () => {
+    const fixtures = {
+      acai: { name: `Açaí da Esquina ${tag}`, category: "Sobremesas", rating: 4.5 },
+      cantina: { name: `Cantina ${tag}`, category: `Massas ${tag}` },
+      pizza100: { name: `Pizza 100% ${tag}`, category: "Pizzaria" },
+      pizza1000: { name: `Pizza 1000 ${tag}`, category: "Pizzaria" },
+      bar: { name: `Bar ${tag}x1`, category: "Bares" }
+    };
+
+    for (const [key, data] of Object.entries(fixtures)) {
+      const response = await postRestaurant(data);
+      const body = await response.json();
+      ids[key] = body.id;
+      createdIds.push(body.id);
+    }
+  });
+
+  it("encontra pelo nome sem diferenciar maiúsculas nem acentos", async () => {
+    const response = await search(`ACAI DA ESQUINA ${tag}`);
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(await foundKeys(response), ["acai"]);
+  });
+
+  it("encontra também quando o termo é digitado com acento e o nome não tem", async () => {
+    const response = await search(`Cantína ${tag}`);
+
+    assert.deepEqual(await foundKeys(response), ["cantina"]);
+  });
+
+  it("encontra pela categoria", async () => {
+    const response = await search(`massas ${tag}`);
+
+    assert.deepEqual(await foundKeys(response), ["cantina"]);
+  });
+
+  it("encontra por um trecho do nome e devolve em ordem alfabética", async () => {
+    const response = await search(tag);
+    const body = await response.json();
+    const order = body
+      .map((restaurant) => Object.keys(ids).find((key) => ids[key] === restaurant.id))
+      .filter(Boolean);
+
+    assert.equal(order.length, 5);
+    // A ordem entre "Pizza 100%" e "Pizza 1000" depende da colação do banco (pontuação),
+    // então só conferimos que as duas pizzas vêm depois de Açaí, Bar e Cantina
+    assert.deepEqual(order.slice(0, 3), ["acai", "bar", "cantina"]);
+    assert.deepEqual(order.slice(3).sort(), ["pizza100", "pizza1000"]);
+  });
+
+  it("mantém o formato da listagem (rating como número)", async () => {
+    const response = await search(`acai da esquina ${tag}`);
+    const [restaurant] = await response.json();
+
+    assert.deepEqual(Object.keys(restaurant).sort(), ["category", "id", "name", "ownerId", "rating"]);
+    assert.equal(restaurant.rating, 4.5);
+    assert.equal(typeof restaurant.ownerId, "number");
+  });
+
+  it("trata % como caractere comum, não como curinga", async () => {
+    const response = await search(`100% ${tag}`);
+
+    assert.deepEqual(await foundKeys(response), ["pizza100"]);
+  });
+
+  it("trata _ como caractere comum, não como curinga", async () => {
+    const response = await search(`${tag}_1`);
+
+    assert.deepEqual(await foundKeys(response), []);
+  });
+
+  it("ignora espaços no começo e no fim do termo", async () => {
+    const response = await search(`   cantina ${tag}   `);
+
+    assert.deepEqual(await foundKeys(response), ["cantina"]);
+  });
+
+  it("retorna 200 com lista vazia quando nada corresponde", async () => {
+    const response = await search(`inexistente ${tag}`);
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), []);
+  });
+
+  it("não é vulnerável a SQL injection pelo termo", async () => {
+    const response = await search("' OR 1=1 --");
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), []);
+  });
+
+  // Não comparamos o tamanho com GET /restaurants: os arquivos de teste rodam em paralelo
+  // e outro arquivo pode criar/apagar restaurantes entre as duas chamadas. Conferimos que
+  // vieram todos os restaurantes deste arquivo, inclusive os que não têm a marca no nome.
+  it("termo vazio ou só com espaços devolve a lista completa", async () => {
+    for (const term of ["", "   "]) {
+      const response = await search(term);
+      const body = await response.json();
+
+      assert.equal(response.status, 200);
+      for (const id of createdIds) {
+        assert.ok(body.some((restaurant) => restaurant.id === id), `faltou o restaurante ${id}`);
+      }
+    }
+  });
+
+  it("retorna 400 quando search é enviado mais de uma vez", async () => {
+    const response = await fetch(`${baseUrl}/restaurants?search=pizza&search=bar`);
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.equal(body.error, "O parâmetro search deve ser um único texto");
+  });
+
+  it("aceita até 150 caracteres e retorna 400 acima disso", async () => {
+    assert.equal((await search("a".repeat(150))).status, 200);
+
+    const response = await search("a".repeat(151));
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.equal(body.error, "A busca deve ter até 150 caracteres");
+  });
+});

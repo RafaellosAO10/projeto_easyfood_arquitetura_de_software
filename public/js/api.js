@@ -62,6 +62,7 @@ export const api = {
   uploadProfileImage: (file) => request("/auth/me/image", { method: "POST", form: imageForm(file), auth: true }),
 
   listRestaurants: () => request("/restaurants"),
+  searchRestaurants: (term) => request(`/restaurants?search=${encodeURIComponent(term)}`),
   createRestaurant: (data) => request("/restaurants", { method: "POST", body: data, auth: true }),
 
   listDishes: (restaurantId) => request(`/restaurants/${restaurantId}/dishes`),

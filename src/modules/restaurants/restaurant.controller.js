@@ -22,9 +22,29 @@ function validateRestaurant({ name, category, rating }) {
   return null;
 }
 
+// Mesmo limite da coluna mais longa pesquisada (name, VARCHAR(150))
+const MAX_SEARCH_LENGTH = 150;
+
+// GET /restaurants lista todos; GET /restaurants?search=termo filtra por nome ou categoria.
+// search vazio ou só com espaços equivale a não filtrar.
 async function list(req, res) {
+  const { search } = req.query;
+
+  // ?search=a&search=b chega como array: não é um termo de busca válido
+  if (search !== undefined && typeof search !== "string") {
+    return res.status(400).json({ error: "O parâmetro search deve ser um único texto" });
+  }
+
+  const term = (search || "").trim();
+
+  if (term.length > MAX_SEARCH_LENGTH) {
+    return res.status(400).json({ error: `A busca deve ter até ${MAX_SEARCH_LENGTH} caracteres` });
+  }
+
   try {
-    const restaurants = await restaurantService.listRestaurants();
+    const restaurants = term
+      ? await restaurantService.searchRestaurants(term)
+      : await restaurantService.listRestaurants();
     res.json(restaurants);
   } catch (error) {
     console.error("Erro ao buscar restaurantes:", error.message);

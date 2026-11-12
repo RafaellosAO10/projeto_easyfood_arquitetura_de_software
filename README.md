@@ -86,7 +86,7 @@ npm test
 
 | Método | Rota             | Acesso    | Descrição                                   |
 |--------|------------------|-----------|---------------------------------------------|
-| GET    | `/restaurants`   | Público   | Lista os restaurantes                       |
+| GET    | `/restaurants`   | Público   | Lista os restaurantes; `?search=` filtra por nome ou categoria (ADR-011) |
 | POST   | `/restaurants`   | **Token** | Cadastra um restaurante                     |
 | POST   | `/auth/register` | Público   | Cadastra um usuário                         |
 | POST   | `/auth/login`    | Público   | Autentica e devolve um JWT (válido por 1 dia) |
@@ -148,6 +148,7 @@ curl -H "Authorization: Bearer $TOKEN" -F "image=@foto.jpg" http://localhost:300
 | Rota | Regras | Erro |
 |------|--------|------|
 | `POST /restaurants` | `name` (até 150) e `category` (até 100) obrigatórios; `rating` opcional, número de 0 a 5 | `400` |
+| `GET /restaurants?search=` | Trecho do nome ou da categoria, sem diferenciar maiúsculas nem acentos; vazio lista todos; até 150 caracteres, um único valor | `400` |
 | `POST /auth/register` | `name` (até 150), `email` válido (até 150) e `password` (6 a 72 caracteres) obrigatórios | `400`; e-mail já cadastrado: `409` |
 | `POST /auth/login` | `email` e `password` obrigatórios | `400`; credenciais inválidas: `401` |
 | `POST`/`PUT` de pratos | `name` (até 150) e `category` (até 100) obrigatórios; `price` número ≥ 0; `description` opcional (até 1000) | `400`; restaurante/prato inexistente: `404`; não é dono: `403` |
@@ -213,6 +214,7 @@ easy-food/
 | Pós-atividades | Banco hospedado no Supabase, com RLS bloqueando a Data API pública (ADR-006) |
 | 8 | Pratos com autorização por dono (ADR-007), PostgreSQL local em Docker (ADR-008) e upload de imagens com Multer + Sharp (ADR-009) |
 | Pós-atividade 8 | Front novo fiel ao mockup da Aula 2 (claro/escuro), com cardápio, carrinho e upload de fotos (ADR-010) |
+| Pós-atividade 8 | Busca de restaurantes na API (`GET /restaurants?search=`), sem diferenciar acentos (ADR-011) |
 
 ## Documentação
 
@@ -228,6 +230,7 @@ easy-food/
   - [ADR-008 — PostgreSQL local em Docker](docs/adr/ADR-008-postgresql-local-em-docker.md)
   - [ADR-009 — Upload e processamento de imagens](docs/adr/ADR-009-upload-e-processamento-de-imagens.md)
   - [ADR-010 — Front-end sem framework](docs/adr/ADR-010-front-end-sem-framework.md)
+  - [ADR-011 — Busca de restaurantes no servidor](docs/adr/ADR-011-busca-de-restaurantes-no-servidor.md)
 - Missões
   - [Missão 1 — Cadastro de restaurantes](docs/missoes/missao-1.md)
   - [Missão 2 — Teste da arquitetura e registro de decisões](docs/missoes/missao-2.md)
