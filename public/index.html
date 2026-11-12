@@ -2,72 +2,39 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>EasyFood</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>EasyFood</h1>
-    <p>Restaurantes disponíveis na plataforma</p>
-  </header>
+  <div class="app">
+    <header class="topbar" id="topbar"></header>
 
-  <main>
-    <section class="card" id="auth-section">
-      <div id="auth-logged-out">
-        <h2 id="auth-title">Entrar</h2>
-        <form id="auth-form">
-          <label id="auth-name-field" hidden>
-            Nome *
-            <input name="name" maxlength="150" placeholder="Seu nome">
-          </label>
-          <label>
-            E-mail *
-            <input name="email" type="email" maxlength="150" placeholder="voce@email.com" required>
-          </label>
-          <label>
-            Senha *
-            <input name="password" type="password" minlength="6" maxlength="72" required>
-          </label>
-          <button type="submit" id="auth-submit">Entrar</button>
-          <button type="button" id="auth-toggle" class="link-button">Não tem conta? Cadastre-se</button>
-          <p id="auth-message" class="message" role="status"></p>
-        </form>
-      </div>
+    <div class="menu" id="menu" hidden>
+      <nav class="menu-panel" aria-label="Menu">
+        <a href="#/">Início</a>
+        <a href="#/buscar">Buscar</a>
+        <a href="#/perfil">Meu perfil e restaurantes</a>
+        <a href="#/carrinho">Carrinho</a>
+        <button type="button" id="menu-auth"></button>
+      </nav>
+    </div>
 
-      <div id="auth-logged-in" class="auth-logged-in" hidden>
-        <span>Conectado como <strong id="auth-user"></strong></span>
-        <button type="button" id="logout-button" class="link-button">Sair</button>
-      </div>
-    </section>
+    <main class="view" id="view" tabindex="-1"></main>
 
-    <section class="card">
-      <h2>Cadastrar restaurante</h2>
-      <p id="restaurant-login-hint" class="hint">Entre com sua conta para cadastrar um restaurante.</p>
-      <form id="restaurant-form">
-        <label>
-          Nome do restaurante *
-          <input name="name" maxlength="150" placeholder="Ex.: Burger House" required>
-        </label>
-        <label>
-          Categoria *
-          <input name="category" maxlength="100" placeholder="Ex.: Hambúrguer" required>
-        </label>
-        <label>
-          Avaliação (0 a 5)
-          <input name="rating" type="number" min="0" max="5" step="0.1" placeholder="Ex.: 4.5">
-        </label>
-        <button type="submit">Cadastrar restaurante</button>
-        <p id="form-message" class="message" role="status"></p>
-      </form>
-    </section>
+    <nav class="tabbar" id="tabbar" aria-label="Navegação principal">
+      <a href="#/" data-tab="inicio"><i class="ti ti-home" aria-hidden="true"></i><span>Início</span></a>
+      <a href="#/buscar" data-tab="buscar"><i class="ti ti-search" aria-hidden="true"></i><span>Buscar</span></a>
+      <a href="#/pedidos" data-tab="pedidos"><i class="ti ti-receipt" aria-hidden="true"></i><span>Pedidos</span></a>
+      <a href="#/favoritos" data-tab="favoritos"><i class="ti ti-heart" aria-hidden="true"></i><span>Favoritos</span></a>
+      <a href="#/perfil" data-tab="perfil"><i class="ti ti-user" aria-hidden="true"></i><span>Perfil</span></a>
+    </nav>
 
-    <section class="card">
-      <h2>Restaurantes</h2>
-      <ul id="restaurant-list" class="restaurant-list"></ul>
-    </section>
-  </main>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -55,6 +55,10 @@ Cliente -> Routes -> [Middleware JWT] -> Controller -> Service -> Database (Pris
    npm run seed
    ```
 
+   Opcional, para o front ter cardápio de exemplo: `npm run seed:pratos` cria pratos fictícios
+   e um dono de demonstração (`dono.demo@easyfood.test`, senha de teste em `prisma/seed-pratos.js`)
+   para os restaurantes do seed que ainda não têm dono.
+
 5. Inicie o servidor:
 
    ```bash
@@ -62,7 +66,9 @@ Cliente -> Routes -> [Middleware JWT] -> Controller -> Service -> Database (Pris
    ```
 
    Saída esperada: `EasyFood rodando na porta 3000`.
-   A página web fica disponível em http://localhost:3000.
+   O app web fica disponível em http://localhost:3000: início com restaurantes, busca,
+   cardápio com fotos, carrinho, login/cadastro e perfil (foto, meus restaurantes, cadastro
+   de pratos com foto e tema claro/escuro). Ver [ADR-010](docs/adr/ADR-010-front-end-sem-framework.md).
    As imagens enviadas ficam em `uploads/` (fora do Git) e são servidas em `/uploads/...`.
 
 Para visualizar os dados: `npx prisma studio` (http://localhost:5555).
@@ -155,8 +161,17 @@ easy-food/
 ├── prisma/
 │   ├── migrations/
 │   ├── schema.prisma        # models Restaurant, User e Dish
-│   └── seed.js
-├── public/                  # página web (HTML, CSS e JS)
+│   ├── seed.js
+│   └── seed-pratos.js       # pratos e dono de demonstração (opcional)
+├── public/                  # app web sem framework (ADR-010)
+│   ├── index.html
+│   ├── styles.css           # tema claro e escuro
+│   └── js/
+│       ├── app.js           # rotas (#/...), cabeçalho e barra inferior
+│       ├── api.js           # todas as chamadas à API
+│       ├── store.js         # sessão, carrinho e tema (localStorage)
+│       ├── ui.js            # utilitários de interface
+│       └── views/           # uma tela por arquivo
 ├── src/
 │   ├── database/
 │   │   └── prisma.js        # conexão com o banco
@@ -197,6 +212,7 @@ easy-food/
 | 5 | Autenticação JWT: cadastro, login, `/auth/me` e `POST /restaurants` protegido |
 | Pós-atividades | Banco hospedado no Supabase, com RLS bloqueando a Data API pública (ADR-006) |
 | 8 | Pratos com autorização por dono (ADR-007), PostgreSQL local em Docker (ADR-008) e upload de imagens com Multer + Sharp (ADR-009) |
+| Pós-atividade 8 | Front novo fiel ao mockup da Aula 2 (claro/escuro), com cardápio, carrinho e upload de fotos (ADR-010) |
 
 ## Documentação
 
@@ -211,6 +227,7 @@ easy-food/
   - [ADR-007 — Dono do restaurante e autorização de pratos](docs/adr/ADR-007-dono-do-restaurante-e-autorizacao-de-pratos.md)
   - [ADR-008 — PostgreSQL local em Docker](docs/adr/ADR-008-postgresql-local-em-docker.md)
   - [ADR-009 — Upload e processamento de imagens](docs/adr/ADR-009-upload-e-processamento-de-imagens.md)
+  - [ADR-010 — Front-end sem framework](docs/adr/ADR-010-front-end-sem-framework.md)
 - Missões
   - [Missão 1 — Cadastro de restaurantes](docs/missoes/missao-1.md)
   - [Missão 2 — Teste da arquitetura e registro de decisões](docs/missoes/missao-2.md)
