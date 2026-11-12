@@ -69,6 +69,12 @@ export const api = {
   addFavorite: (restaurantId) => request(`/favorites/${restaurantId}`, { method: "PUT", auth: true }),
   removeFavorite: (restaurantId) => request(`/favorites/${restaurantId}`, { method: "DELETE", auth: true }),
 
+  // Pedidos (ADR-013): mando só dishId e quantity; preço e total quem calcula é o servidor
+  createOrder: (restaurantId, items) => request("/orders", { method: "POST", body: { restaurantId, items }, auth: true }),
+  listOrders: () => request("/orders", { auth: true }),
+  getOrder: (orderId) => request(`/orders/${orderId}`, { auth: true }),
+  setOrderStatus: (orderId, status) => request(`/orders/${orderId}/status`, { method: "PATCH", body: { status }, auth: true }),
+
   listDishes: (restaurantId) => request(`/restaurants/${restaurantId}/dishes`),
   getDish: (dishId) => request(`/dishes/${dishId}`),
   createDish: (restaurantId, data) => request(`/restaurants/${restaurantId}/dishes`, { method: "POST", body: data, auth: true }),

@@ -9,7 +9,7 @@ import { renderPerfil } from "./views/perfil.js";
 import { renderRestauranteForm } from "./views/restaurante-form.js";
 import { renderBuscar } from "./views/buscar.js";
 import { renderCarrinho } from "./views/carrinho.js";
-import { renderEmBreve } from "./views/em-breve.js";
+import { renderPedidos, renderPedido } from "./views/pedidos.js";
 import { renderFavoritos } from "./views/favoritos.js";
 
 // header "home" = menu, logo e carrinho; header com title = voltar + título
@@ -23,7 +23,8 @@ const ROUTES = [
   { path: /^\/perfil\/novo-restaurante$/, render: renderRestauranteForm, tab: "perfil", title: "Novo restaurante", auth: true },
   { path: /^\/buscar$/, render: renderBuscar, tab: "buscar", title: "Buscar" },
   { path: /^\/carrinho$/, render: renderCarrinho, tab: "inicio", title: "Carrinho" },
-  { path: /^\/pedidos$/, render: renderEmBreve, tab: "pedidos", title: "Pedidos", feature: "pedidos" },
+  { path: /^\/pedidos$/, render: renderPedidos, tab: "pedidos", title: "Pedidos" },
+  { path: /^\/pedido\/(\d+)$/, render: renderPedido, tab: "pedidos", title: "Pedido", auth: true },
   { path: /^\/favoritos$/, render: renderFavoritos, tab: "favoritos", title: "Favoritos" }
 ];
 

@@ -78,6 +78,15 @@ As chaves estrangeiras de `Order` usam `ON DELETE CASCADE` para usuário e resta
 favoritos (ADR-012). A API não tem rota para apagar restaurante nem usuário; se um dia tiver,
 esta escolha deve ser revista (provavelmente impedir a exclusão de quem tem pedidos).
 
+### No front
+O carrinho ganhou "Finalizar pedido": manda só pratos e quantidades e, se o total do servidor
+for diferente do mostrado (preço mudou depois que o carrinho foi montado), avisa o total novo.
+Um clique duplo não cria dois pedidos. A aba Pedidos usa a variante B escolhida em prévia
+claro/escuro: pedidos em andamento em destaque com uma barra de 4 etapas e os anteriores em
+linhas. O detalhe (`#/pedido/:id`) consulta o status a cada 20 s enquanto o pedido anda (sem
+WebSocket, coerente com o ADR-005), deixa cancelar em `PLACED` e oferece "pedir de novo" com
+os pratos e preços atuais do cardápio.
+
 ## Consequências
 - Positivas: o preço não pode ser manipulado pelo navegador; o histórico de pedidos não muda
   com o cardápio; as regras de status ficam em uma tabela única e testável, e a concorrência

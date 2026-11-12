@@ -337,3 +337,26 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 
 /* Enquanto a busca carrega, o resultado anterior fica esmaecido */
 #results[aria-busy="true"] > .restaurant-card { opacity: .55; transition: opacity .15s; }
+
+/* Pedidos (variante B): os em andamento em destaque com a barra de etapas; os anteriores em linhas */
+.order-active {
+  display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; margin-bottom: 10px;
+  background: var(--tint); border-radius: var(--radius); color: var(--text);
+}
+a.order-active:hover { outline: 1px solid var(--accent); }
+.order-line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.order-steps { display: flex; gap: 4px; margin: 2px 0; }
+.order-steps i { flex: 1; height: 5px; border-radius: 3px; background: var(--border); }
+.order-steps i.done { background: var(--accent); }
+.order-status { color: var(--accent); font-weight: 600; }
+.order-list { border-top: 1px solid var(--border); }
+.order-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border); color: var(--text);
+}
+.order-row > span:first-child { display: flex; flex-direction: column; min-width: 0; }
+.order-row strong { font-weight: 600; }
+a.order-row:hover strong { color: var(--accent); }
+.order-final { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--accent); margin: 0; }
+.order-final i { font-size: 20px; }
+.danger-text { color: var(--danger) !important; }

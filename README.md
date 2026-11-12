@@ -67,7 +67,7 @@ Cliente -> Routes -> [Middleware JWT] -> Controller -> Service -> Database (Pris
 
    Saída esperada: `EasyFood rodando na porta 3000`.
    O app web fica disponível em http://localhost:3000: início com restaurantes, busca,
-   cardápio com fotos, carrinho, login/cadastro e perfil (foto, meus restaurantes, cadastro
+   cardápio com fotos, carrinho com finalizar pedido, acompanhamento de pedidos, login/cadastro e perfil (foto, meus restaurantes, cadastro
    de pratos com foto e tema claro/escuro). Ver [ADR-010](docs/adr/ADR-010-front-end-sem-framework.md).
    As imagens enviadas ficam em `uploads/` (fora do Git) e são servidas em `/uploads/...`.
 
@@ -236,6 +236,7 @@ easy-food/
 | Pós-atividade 8 | Busca de restaurantes na API (`GET /restaurants?search=`), sem diferenciar acentos (ADR-011) |
 | Pós-atividade 8 | Favoritos por usuário no banco (`/favorites`) e no front: coração nos cards e aba Favoritos (ADR-012) |
 | Pós-atividade 8 | Pedidos na API (`/orders`): preço calculado no servidor e status com máquina de estados (ADR-013) |
+| Pós-atividade 8 | Finalizar pedido no carrinho e aba Pedidos com barra de etapas, cancelamento e "pedir de novo" (ADR-013) |
 
 ## Documentação
 
