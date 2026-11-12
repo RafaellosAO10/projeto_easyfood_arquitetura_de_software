@@ -10,6 +10,7 @@ import { renderRestauranteForm } from "./views/restaurante-form.js";
 import { renderBuscar } from "./views/buscar.js";
 import { renderCarrinho } from "./views/carrinho.js";
 import { renderEmBreve } from "./views/em-breve.js";
+import { renderFavoritos } from "./views/favoritos.js";
 
 // header "home" = menu, logo e carrinho; header com title = voltar + título
 const ROUTES = [
@@ -23,7 +24,7 @@ const ROUTES = [
   { path: /^\/buscar$/, render: renderBuscar, tab: "buscar", title: "Buscar" },
   { path: /^\/carrinho$/, render: renderCarrinho, tab: "inicio", title: "Carrinho" },
   { path: /^\/pedidos$/, render: renderEmBreve, tab: "pedidos", title: "Pedidos", feature: "pedidos" },
-  { path: /^\/favoritos$/, render: renderEmBreve, tab: "favoritos", title: "Favoritos", feature: "favoritos" }
+  { path: /^\/favoritos$/, render: renderFavoritos, tab: "favoritos", title: "Favoritos" }
 ];
 
 const topbar = document.getElementById("topbar");

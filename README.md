@@ -223,7 +223,7 @@ easy-food/
 | 8 | Pratos com autorização por dono (ADR-007), PostgreSQL local em Docker (ADR-008) e upload de imagens com Multer + Sharp (ADR-009) |
 | Pós-atividade 8 | Front novo fiel ao mockup da Aula 2 (claro/escuro), com cardápio, carrinho e upload de fotos (ADR-010) |
 | Pós-atividade 8 | Busca de restaurantes na API (`GET /restaurants?search=`), sem diferenciar acentos (ADR-011) |
-| Pós-atividade 8 | Favoritos por usuário no banco (`/favorites`, ADR-012) |
+| Pós-atividade 8 | Favoritos por usuário no banco (`/favorites`) e no front: coração nos cards e aba Favoritos (ADR-012) |
 
 ## Documentação
 

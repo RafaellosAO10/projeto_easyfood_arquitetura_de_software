@@ -46,6 +46,12 @@ da URL, então ninguém lê ou altera favoritos de outra pessoa):
 (duplo clique, nova tentativa após falha de rede) não muda o resultado nem gera erro, o que
 simplifica o front. Com `POST`, o segundo clique daria `409` e o front teria de tratá-lo.
 
+No front, o coração é um botão redondo sobre a foto do card (variante escolhida em prévia
+claro/escuro). O card virou um contêiner com o link e o botão lado a lado, porque botão dentro
+de `<a>` é HTML inválido. A atualização é otimista: o coração muda na hora e volta ao estado
+anterior, com aviso, se a API falhar; cliques repetidos durante a chamada são ignorados. Sem
+login, o coração leva para Entrar e volta à tela de origem; a aba Favoritos convida a entrar.
+
 ## Consequências
 - Positivas: favoritos acompanham a conta; integridade garantida pelo banco (sem duplicata, sem
   órfão); o front pode repetir chamadas sem tratamento especial.

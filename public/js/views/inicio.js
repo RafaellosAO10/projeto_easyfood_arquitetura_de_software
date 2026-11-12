@@ -2,9 +2,9 @@
 import { api } from "../api.js";
 import { getSession } from "../store.js";
 import { esc, icon, firstName, emptyState, skeletons } from "../ui.js";
-import { restaurantCard, loadCovers } from "./shared.js";
+import { restaurantCard, loadCovers, ensureFavorites, bindFavorites } from "./shared.js";
 
-export async function renderInicio({ view, stale }) {
+export async function renderInicio({ view, stale, go }) {
   const session = getSession();
   const hello = session ? `Olá, ${esc(firstName(session.user.name))}` : "Olá!";
 
@@ -15,12 +15,14 @@ export async function renderInicio({ view, stale }) {
     <div class="section-head"><h2>Restaurantes</h2><span class="muted small" id="count"></span></div>
     <div id="list">${skeletons(3)}</div>`;
 
-  const restaurants = await api.listRestaurants();
+  // Os favoritos vêm junto para os corações já aparecerem pintados
+  const [restaurants] = await Promise.all([api.listRestaurants(), ensureFavorites()]);
   if (stale()) return;
 
   const list = view.querySelector("#list");
   const chips = view.querySelector("#chips");
   const count = view.querySelector("#count");
+  bindFavorites(list, { go });
   const categories = [...new Set(restaurants.map((r) => r.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
   let selected = "";
 

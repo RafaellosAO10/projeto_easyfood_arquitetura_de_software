@@ -2,8 +2,7 @@
 import { emptyState } from "../ui.js";
 
 const TEXTOS = {
-  pedidos: ["receipt", "Seus pedidos aparecem aqui", "O acompanhamento de pedidos chega com o módulo de pedidos da API."],
-  favoritos: ["heart", "Seus favoritos aparecem aqui", "Favoritar restaurantes chega na próxima etapa, salvo no banco por usuário."]
+  pedidos: ["receipt", "Seus pedidos aparecem aqui", "O acompanhamento de pedidos chega com o módulo de pedidos da API."]
 };
 
 export function renderEmBreve({ view, route }) {

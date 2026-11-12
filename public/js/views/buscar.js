@@ -2,12 +2,12 @@
 // A API ignora maiúsculas e acentos; aqui só esperamos o usuário parar de digitar.
 import { api } from "../api.js";
 import { esc, icon, emptyState, skeletons } from "../ui.js";
-import { restaurantCard, loadCovers } from "./shared.js";
+import { restaurantCard, loadCovers, ensureFavorites, bindFavorites } from "./shared.js";
 
 const DEBOUNCE_MS = 300;
 const MAX_LENGTH = 150; // mesmo limite validado pela API
 
-export async function renderBuscar({ view, query, stale }) {
+export async function renderBuscar({ view, query, stale, go }) {
   view.innerHTML = `<label class="searchbox" style="margin-top:0">${icon("search")}
       <input type="search" id="q" placeholder="Buscar restaurante ou categoria" aria-label="Buscar"
         maxlength="${MAX_LENGTH}" autocomplete="off" value=""></label>
@@ -19,6 +19,7 @@ export async function renderBuscar({ view, query, stale }) {
   const status = view.querySelector("#status");
   input.value = (query.get("q") || "").slice(0, MAX_LENGTH);
   input.focus();
+  bindFavorites(results, { go });
 
   let timer;
   let lastSearch = 0;
@@ -77,5 +78,7 @@ export async function renderBuscar({ view, query, stale }) {
     }
   });
 
+  await ensureFavorites();
+  if (stale()) return;
   await runSearch();
 }

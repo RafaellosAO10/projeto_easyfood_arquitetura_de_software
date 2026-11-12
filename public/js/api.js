@@ -65,6 +65,10 @@ export const api = {
   searchRestaurants: (term) => request(`/restaurants?search=${encodeURIComponent(term)}`),
   createRestaurant: (data) => request("/restaurants", { method: "POST", body: data, auth: true }),
 
+  listFavorites: () => request("/favorites", { auth: true }),
+  addFavorite: (restaurantId) => request(`/favorites/${restaurantId}`, { method: "PUT", auth: true }),
+  removeFavorite: (restaurantId) => request(`/favorites/${restaurantId}`, { method: "DELETE", auth: true }),
+
   listDishes: (restaurantId) => request(`/restaurants/${restaurantId}/dishes`),
   getDish: (dishId) => request(`/dishes/${dishId}`),
   createDish: (restaurantId, data) => request(`/restaurants/${restaurantId}/dishes`, { method: "POST", body: data, auth: true }),

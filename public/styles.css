@@ -14,6 +14,7 @@
   --danger: #c0392b;
   --danger-bg: #fcebea;
   --star: #e0a21b;
+  --heart: #e03131;
   --radius: 10px;
   color-scheme: light;
 }
@@ -33,6 +34,7 @@
     --tint: #1c3323;
     --danger: #f08a7e;
     --danger-bg: #3a1d1a;
+  --heart: #ff6b6b;
     color-scheme: dark;
   }
 }
@@ -51,6 +53,7 @@
   --tint: #1c3323;
   --danger: #f08a7e;
   --danger-bg: #3a1d1a;
+  --heart: #ff6b6b;
   color-scheme: dark;
 }
 
@@ -111,7 +114,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-size: 22px; cursor: pointer; position: relative; flex: none;
 }
 .icon-btn:hover { background: var(--surface); }
-.icon-btn:focus-visible, .btn:focus-visible, .chip:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.icon-btn:focus-visible, .btn:focus-visible, .fav-btn:focus-visible, .chip:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .icon-spacer { width: 36px; flex: none; }
 
 .badge {
@@ -172,8 +175,18 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 /* Cards de restaurante */
 .restaurant-card {
   display: block; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; overflow: hidden; margin-bottom: 12px;
+  border-radius: 14px; overflow: hidden; margin-bottom: 12px; position: relative;
 }
+.restaurant-card > a { display: block; }
+
+/* Favoritar: botão redondo sobre a foto (variante A escolhida na prévia) */
+.fav-btn {
+  position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 50%;
+  border: 0; background: var(--bg); color: var(--muted); font-size: 19px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
+}
+.fav-btn[aria-pressed="true"] { color: var(--heart); }
+.fav-btn:active { transform: scale(.92); }
 .restaurant-card .cover { height: 96px; font-size: 32px; }
 .restaurant-card-body { padding: 9px 12px 11px; }
 .restaurant-card-body strong { display: block; font-size: 15px; }
