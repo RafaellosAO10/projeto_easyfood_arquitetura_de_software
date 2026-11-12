@@ -6,6 +6,7 @@ const restaurantRoutes = require("./modules/restaurants/restaurant.routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const dishRoutes = require("./modules/dishes/dish.routes");
 const favoriteRoutes = require("./modules/favorites/favorite.routes");
+const orderRoutes = require("./modules/orders/order.routes");
 const { UPLOAD_DIR, PUBLIC_PREFIX } = require("./modules/shared/image.service");
 
 const app = express();
@@ -25,5 +26,7 @@ app.use("/restaurants", restaurantRoutes);
 app.use("/favorites", favoriteRoutes);
 // As rotas de pratos usam caminhos completos (/restaurants/:id/dishes e /dishes/:id)
 app.use(dishRoutes);
+// Pedidos: /orders e /restaurants/:id/orders (caminhos completos, como pratos)
+app.use(orderRoutes);
 
 module.exports = app;

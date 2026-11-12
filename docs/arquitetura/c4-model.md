@@ -26,8 +26,8 @@ flowchart LR
 
     subgraph easyfood["EasyFood"]
         web["Página web<br/>[HTML + JavaScript]<br/>public/"]
-        api["EasyFood API<br/>[Node.js + Express + Prisma + JWT]<br/>/restaurants · /auth · /dishes · /favorites"]
-        db[("Banco de dados<br/>[PostgreSQL]<br/>tabelas Restaurant, User, Dish e Favorite")]
+        api["EasyFood API<br/>[Node.js + Express + Prisma + JWT]<br/>/restaurants · /auth · /dishes · /favorites · /orders"]
+        db[("Banco de dados<br/>[PostgreSQL]<br/>tabelas Restaurant, User, Dish, Favorite, Order e OrderItem")]
     end
 
     usuario -- "Navegador" --> web
@@ -75,6 +75,12 @@ flowchart TB
         favService["favorite.service.js<br/>favoritar/remover idempotentes"]
     end
 
+    subgraph orders["Módulo orders"]
+        orderRoutes["order.routes.js<br/>/orders e /restaurants/:id/orders (protegidos)"]
+        orderController["order.controller.js<br/>usuário sempre do token"]
+        orderService["order.service.js<br/>preço do banco · máquina de estados"]
+    end
+
     database["src/database/prisma.js<br/>PrismaClient"]
     db[("PostgreSQL")]
 
@@ -83,6 +89,7 @@ flowchart TB
     app -- "/restaurants" --> routes
     app -- "/restaurants/:id/dishes · /dishes" --> dishRoutes
     app -- "/favorites" --> favRoutes
+    app -- "/orders · /restaurants/:id/orders" --> orderRoutes
     authRoutes --> authController --> authService
     authRoutes -- "GET /me" --> middleware
     routes -- "POST /" --> middleware
@@ -91,10 +98,13 @@ flowchart TB
     favRoutes --> middleware
     dishRoutes --> dishController --> dishService
     favRoutes --> favController --> favService
+    orderRoutes --> middleware
+    orderRoutes --> orderController --> orderService
     authService --> database
     service --> database
     dishService --> database
     favService --> database
+    orderService --> database
     database --> db
 ```
 

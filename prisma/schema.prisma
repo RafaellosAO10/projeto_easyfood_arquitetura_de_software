@@ -22,6 +22,7 @@ model Restaurant {
   owner       User?      @relation(fields: [ownerId], references: [id])
   dishes      Dish[]
   favoritedBy Favorite[]
+  orders      Order[]
 }
 
 model User {
@@ -33,18 +34,20 @@ model User {
   imageUrl    String?      @db.VarChar(255)
   restaurants Restaurant[]
   favorites   Favorite[]
+  orders      Order[]
 }
 
 model Dish {
-  id           Int        @id @default(autoincrement())
-  name         String     @db.VarChar(150)
-  category     String     @db.VarChar(100)
-  description  String     @default("")
-  price        Decimal    @db.Decimal(10, 2)
+  id           Int         @id @default(autoincrement())
+  name         String      @db.VarChar(150)
+  category     String      @db.VarChar(100)
+  description  String      @default("")
+  price        Decimal     @db.Decimal(10, 2)
   // Caminho público da imagem; nulo até o dono enviar a foto do prato
-  imageUrl     String?    @db.VarChar(255)
+  imageUrl     String?     @db.VarChar(255)
   restaurantId Int
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems   OrderItem[]
 
   @@index([restaurantId])
 }
@@ -61,4 +64,47 @@ model Favorite {
 
   @@id([userId, restaurantId])
   @@index([restaurantId])
+}
+
+// Etapas de um pedido (ver ADR-013). As transições permitidas ficam em order.service.js.
+enum OrderStatus {
+  PLACED // recebido, aguardando o restaurante
+  PREPARING // em preparo
+  OUT_FOR_DELIVERY // saiu para entrega
+  DELIVERED // entregue (final)
+  CANCELLED // cancelado (final)
+}
+
+// Pedido de um cliente para um restaurante (um restaurante por pedido, como o carrinho).
+// O total é calculado no servidor a partir dos preços do banco, nunca enviado pelo cliente.
+model Order {
+  id           Int         @id @default(autoincrement())
+  userId       Int
+  restaurantId Int
+  status       OrderStatus @default(PLACED)
+  total        Decimal     @db.Decimal(10, 2)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+
+  @@index([userId, createdAt])
+  @@index([restaurantId, createdAt])
+}
+
+// Item do pedido. Nome e preço são uma "foto" do prato no momento da compra:
+// mudar ou apagar o prato depois não altera pedidos antigos (dishId vira nulo).
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  dishId    Int?
+  name      String  @db.VarChar(150)
+  unitPrice Decimal @db.Decimal(10, 2)
+  quantity  Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  dish      Dish?   @relation(fields: [dishId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([dishId])
 }
