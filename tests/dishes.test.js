@@ -86,6 +86,17 @@ describe("POST /restaurants/:restaurantId/dishes", () => {
     assert.equal(response.status, 400);
   });
 
+  // A coluna id é INTEGER (até 2147483647); acima disso o Prisma recusaria o valor (era 500)
+  it("retorna 400, e não 500, com id maior que o INTEGER do banco", async () => {
+    for (const url of [`/restaurants/2147483648/dishes`, `/dishes/9999999999`]) {
+      const response = await fetch(`${baseUrl}${url}`);
+      assert.equal(response.status, 400, url);
+    }
+
+    const response = await fetch(`${baseUrl}/dishes/2147483647`);
+    assert.equal(response.status, 404);
+  });
+
   it("retorna 400 sem nome ou categoria", async () => {
     const response = await postJson(url(), { price: 10 }, owner.token);
     assert.equal(response.status, 400);
