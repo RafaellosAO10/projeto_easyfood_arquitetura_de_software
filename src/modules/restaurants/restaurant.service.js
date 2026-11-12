@@ -14,12 +14,14 @@ async function listRestaurants() {
   return restaurants.map(formatRestaurant);
 }
 
-async function createRestaurant(data) {
+// ownerId vem do token JWT (req.user.id): quem cadastra é o dono do restaurante
+async function createRestaurant(data, ownerId) {
   const restaurant = await prisma.restaurant.create({
     data: {
       name: data.name,
       category: data.category,
-      rating: data.rating || 0
+      rating: data.rating || 0,
+      ownerId
     }
   });
 

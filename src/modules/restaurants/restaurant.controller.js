@@ -47,7 +47,7 @@ async function create(req, res) {
       name,
       category,
       rating
-    });
+    }, req.user.id);
 
     res.status(201).json(restaurant);
   } catch (error) {

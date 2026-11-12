@@ -16,11 +16,33 @@ model Restaurant {
   name     String   @db.VarChar(150)
   category String?  @db.VarChar(100)
   rating   Decimal? @db.Decimal(2, 1)
+  // Dono do restaurante (quem o cadastrou). Opcional porque os restaurantes
+  // anteriores a esta versão não têm dono; esses não podem ser gerenciados (ADR-007).
+  ownerId  Int?
+  owner    User?    @relation(fields: [ownerId], references: [id])
+  dishes   Dish[]
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String @db.VarChar(150)
-  email    String @unique @db.VarChar(150)
-  password String @db.VarChar(255)
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(150)
+  email       String       @unique @db.VarChar(150)
+  password    String       @db.VarChar(255)
+  // Caminho público da foto de perfil (ex.: /uploads/users/1-...webp)
+  imageUrl    String?      @db.VarChar(255)
+  restaurants Restaurant[]
+}
+
+model Dish {
+  id           Int        @id @default(autoincrement())
+  name         String     @db.VarChar(150)
+  category     String     @db.VarChar(100)
+  description  String     @default("")
+  price        Decimal    @db.Decimal(10, 2)
+  // Caminho público da imagem; nulo até o dono enviar a foto do prato
+  imageUrl     String?    @db.VarChar(255)
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
 }

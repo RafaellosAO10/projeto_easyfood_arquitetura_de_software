@@ -33,9 +33,47 @@ function postJson(url, body, token) {
   });
 }
 
+// Requisição JSON com qualquer método (PUT, DELETE...)
+function requestJson(method, url, body, token) {
+  const headers = {};
+
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+}
+
+// Cadastra um usuário de teste e devolve { email, token, id }
+async function createUser(baseUrl, prefix) {
+  const email = uniqueEmail(prefix);
+
+  await postJson(`${baseUrl}/auth/register`, {
+    name: "Usuário de Teste",
+    email,
+    password: "123456"
+  });
+
+  const response = await postJson(`${baseUrl}/auth/login`, { email, password: "123456" });
+  const { token } = await response.json();
+  const { id } = await prisma.user.findUnique({ where: { email } });
+
+  return { email, token, id };
+}
+
 module.exports = {
   prisma,
   startServer,
   uniqueEmail,
-  postJson
+  postJson,
+  requestJson,
+  createUser
 };
