@@ -6,21 +6,22 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model Restaurant {
-  id       Int      @id @default(autoincrement())
-  name     String   @db.VarChar(150)
-  category String?  @db.VarChar(100)
-  rating   Decimal? @db.Decimal(2, 1)
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(150)
+  category    String?    @db.VarChar(100)
+  rating      Decimal?   @db.Decimal(2, 1)
   // Dono do restaurante (quem o cadastrou). Opcional porque os restaurantes
   // anteriores a esta versão não têm dono; esses não podem ser gerenciados (ver ADR-007).
-  ownerId  Int?
-  owner    User?    @relation(fields: [ownerId], references: [id])
-  dishes   Dish[]
+  ownerId     Int?
+  owner       User?      @relation(fields: [ownerId], references: [id])
+  dishes      Dish[]
+  favoritedBy Favorite[]
 }
 
 model User {
@@ -31,6 +32,7 @@ model User {
   // Caminho público da foto de perfil (ex.: /uploads/users/1-...webp)
   imageUrl    String?      @db.VarChar(255)
   restaurants Restaurant[]
+  favorites   Favorite[]
 }
 
 model Dish {
@@ -44,5 +46,19 @@ model Dish {
   restaurantId Int
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
+  @@index([restaurantId])
+}
+
+// Restaurante favorito de um usuário (tabela de ligação N:N, ver ADR-012).
+// A chave composta impede favoritar o mesmo restaurante duas vezes; apagar o
+// usuário ou o restaurante apaga os favoritos ligados a ele.
+model Favorite {
+  userId       Int
+  restaurantId Int
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@id([userId, restaurantId])
   @@index([restaurantId])
 }

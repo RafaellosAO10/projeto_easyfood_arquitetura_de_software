@@ -52,6 +52,7 @@ async function createRestaurant(data, ownerId) {
 }
 
 module.exports = {
+  formatRestaurant,
   listRestaurants,
   searchRestaurants,
   createRestaurant

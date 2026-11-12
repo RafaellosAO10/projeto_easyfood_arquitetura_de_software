@@ -26,8 +26,8 @@ flowchart LR
 
     subgraph easyfood["EasyFood"]
         web["Página web<br/>[HTML + JavaScript]<br/>public/"]
-        api["EasyFood API<br/>[Node.js + Express + Prisma + JWT]<br/>/restaurants · /auth"]
-        db[("Banco de dados<br/>[PostgreSQL]<br/>tabelas Restaurant e User")]
+        api["EasyFood API<br/>[Node.js + Express + Prisma + JWT]<br/>/restaurants · /auth · /dishes · /favorites"]
+        db[("Banco de dados<br/>[PostgreSQL]<br/>tabelas Restaurant, User, Dish e Favorite")]
     end
 
     usuario -- "Navegador" --> web
@@ -58,9 +58,21 @@ flowchart TB
     end
 
     subgraph restaurants["Módulo restaurants"]
-        routes["restaurant.routes.js<br/>GET / (público) · POST / (protegido)"]
+        routes["restaurant.routes.js<br/>GET / e GET /?search= (público) · POST / (protegido)"]
         controller["restaurant.controller.js<br/>req/res · validação · status HTTP"]
-        service["restaurant.service.js<br/>Operações e regras"]
+        service["restaurant.service.js<br/>Operações e regras · busca sem acentos"]
+    end
+
+    subgraph dishes["Módulo dishes"]
+        dishRoutes["dish.routes.js<br/>cardápio (público) · CRUD e foto (dono)"]
+        dishController["dish.controller.js<br/>req/res · validação"]
+        dishService["dish.service.js<br/>posse do restaurante (403) · imagem"]
+    end
+
+    subgraph favorites["Módulo favorites"]
+        favRoutes["favorite.routes.js<br/>GET / · PUT e DELETE /:restaurantId (protegidos)"]
+        favController["favorite.controller.js<br/>usuário sempre do token"]
+        favService["favorite.service.js<br/>favoritar/remover idempotentes"]
     end
 
     database["src/database/prisma.js<br/>PrismaClient"]
@@ -69,12 +81,20 @@ flowchart TB
     server --> app
     app -- "/auth" --> authRoutes
     app -- "/restaurants" --> routes
+    app -- "/restaurants/:id/dishes · /dishes" --> dishRoutes
+    app -- "/favorites" --> favRoutes
     authRoutes --> authController --> authService
     authRoutes -- "GET /me" --> middleware
     routes -- "POST /" --> middleware
     routes --> controller --> service
+    dishRoutes -- "escrita" --> middleware
+    favRoutes --> middleware
+    dishRoutes --> dishController --> dishService
+    favRoutes --> favController --> favService
     authService --> database
     service --> database
+    dishService --> database
+    favService --> database
     database --> db
 ```
 

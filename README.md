@@ -98,6 +98,9 @@ npm test
 | PUT    | `/dishes/:dishId` | **Dono** | Atualiza um prato                           |
 | DELETE | `/dishes/:dishId` | **Dono** | Remove um prato (e a imagem dele)           |
 | POST   | `/dishes/:dishId/image` | **Dono** | Envia a foto do prato               |
+| GET    | `/favorites`     | **Token** | Restaurantes favoritos do usuário do token (ADR-012) |
+| PUT    | `/favorites/:restaurantId` | **Token** | Favorita um restaurante (idempotente) |
+| DELETE | `/favorites/:restaurantId` | **Token** | Remove dos favoritos (idempotente) |
 | GET    | `/uploads/...`   | Público   | Imagens otimizadas (WebP)                   |
 
 Rotas com **Token** exigem o header `Authorization: Bearer <token>`; sem ele, a resposta é `401`.
@@ -152,6 +155,7 @@ curl -H "Authorization: Bearer $TOKEN" -F "image=@foto.jpg" http://localhost:300
 | `POST /auth/register` | `name` (até 150), `email` válido (até 150) e `password` (6 a 72 caracteres) obrigatórios | `400`; e-mail já cadastrado: `409` |
 | `POST /auth/login` | `email` e `password` obrigatórios | `400`; credenciais inválidas: `401` |
 | `POST`/`PUT` de pratos | `name` (até 150) e `category` (até 100) obrigatórios; `price` número ≥ 0; `description` opcional (até 1000) | `400`; restaurante/prato inexistente: `404`; não é dono: `403` |
+| `PUT`/`DELETE /favorites/:restaurantId` | `restaurantId` inteiro positivo; repetir a chamada não gera erro (`204`) | `400`; restaurante inexistente no `PUT`: `404` |
 | Upload de imagem | Um arquivo no campo `image`, JPEG/PNG/WebP, até 5 MB | sem arquivo: `400`; grande: `413`; formato: `415`; arquivo corrompido: `422` |
 
 ## Estrutura
@@ -186,6 +190,10 @@ easy-food/
 │   │   │   ├── dish.routes.js        # cardápio e /dishes/:id/image
 │   │   │   ├── dish.controller.js    # req/res e validação
 │   │   │   └── dish.service.js       # regras, posse do restaurante e imagem
+│   │   ├── favorites/
+│   │   │   ├── favorite.routes.js    # /favorites (todas com token)
+│   │   │   ├── favorite.controller.js # req/res; usuário sempre do token
+│   │   │   └── favorite.service.js   # favoritar/remover idempotentes
 │   │   ├── restaurants/
 │   │   │   ├── restaurant.routes.js      # caminhos
 │   │   │   ├── restaurant.controller.js  # req/res e validação
@@ -215,6 +223,7 @@ easy-food/
 | 8 | Pratos com autorização por dono (ADR-007), PostgreSQL local em Docker (ADR-008) e upload de imagens com Multer + Sharp (ADR-009) |
 | Pós-atividade 8 | Front novo fiel ao mockup da Aula 2 (claro/escuro), com cardápio, carrinho e upload de fotos (ADR-010) |
 | Pós-atividade 8 | Busca de restaurantes na API (`GET /restaurants?search=`), sem diferenciar acentos (ADR-011) |
+| Pós-atividade 8 | Favoritos por usuário no banco (`/favorites`, ADR-012) |
 
 ## Documentação
 
@@ -231,6 +240,7 @@ easy-food/
   - [ADR-009 — Upload e processamento de imagens](docs/adr/ADR-009-upload-e-processamento-de-imagens.md)
   - [ADR-010 — Front-end sem framework](docs/adr/ADR-010-front-end-sem-framework.md)
   - [ADR-011 — Busca de restaurantes no servidor](docs/adr/ADR-011-busca-de-restaurantes-no-servidor.md)
+  - [ADR-012 — Favoritos por usuário](docs/adr/ADR-012-favoritos-por-usuario.md)
 - Missões
   - [Missão 1 — Cadastro de restaurantes](docs/missoes/missao-1.md)
   - [Missão 2 — Teste da arquitetura e registro de decisões](docs/missoes/missao-2.md)
