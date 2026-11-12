@@ -1,0 +1,24 @@
+# Banco PostgreSQL local do EasyFood (substitui o Supabase, ver ADR-006).
+# Subir:  docker compose up -d      Parar:  docker compose down
+# A senha vem de POSTGRES_PASSWORD no arquivo .env (fora do Git).
+services:
+  db:
+    image: postgres:17
+    container_name: easyfood-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: easyfood
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: easyfood
+    ports:
+      - "127.0.0.1:5432:5432" # só acessível desta máquina
+    volumes:
+      - easyfood-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U easyfood -d easyfood"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  easyfood-pgdata:
